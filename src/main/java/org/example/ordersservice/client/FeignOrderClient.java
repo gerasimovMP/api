@@ -32,9 +32,3 @@ public interface FeignOrderClient {
     @GetMapping("/api/orders")
     List<OrderDTO> getAllOrders();
 }
-
-
-/*    // Асинхронный запрос
-    @PostMapping("/api/orders")
-    CompletableFuture<OrderDTO> createOrderAsync(@RequestBody OrderDTO orderDTO);  //
-}*/
