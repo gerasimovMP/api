@@ -5,6 +5,8 @@ import org.example.ordersservice.model.OrderDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class OrderService {
 
@@ -18,19 +20,26 @@ public class OrderService {
     }
 
     public OrderDTO createOrderSync(OrderDTO orderDTO) {
-        return feignOrderClient.createOrder(orderDTO);  // Синхронный вызов
+        return feignOrderClient.createOrder(orderDTO);
     }
 
     public void createOrderAsync(OrderDTO orderDTO) {
         kafkaProducerService.sendMessage(orderDTO);
     }
 
+    public OrderDTO getOrderById(Long id) {
+        return feignOrderClient.getOrderById(id);
+    }
 
-/*    // Асинхронный метод для создания заказа
-    public void createOrderAsync(OrderDTO orderDTO) {
-        CompletableFuture<OrderDTO> futureOrder = feignOrderClient.createOrderAsync(orderDTO);  // Асинхронный вызов
-        futureOrder.thenAccept(order -> {
-            System.out.println("Order created asynchronously: " + order);
-        });
-    }*/
+    public OrderDTO updateOrder(Long id, OrderDTO orderDTO) {
+        return feignOrderClient.updateOrder(id, orderDTO);
+    }
+
+    public void deleteOrder(Long id) {
+        feignOrderClient.deleteOrder(id);
+    }
+
+    public List<OrderDTO> getAllOrders() {
+        return feignOrderClient.getAllOrders();
+    }
 }
