@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.example.ordersservice.model.OrderDTO;
-import org.example.ordersservice.service.KafkaProducerService;
+import org.example.ordersservice.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,17 +18,28 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Orders")
 public class OrderController {
 
-    private final KafkaProducerService kafkaProducer;
+    private final OrderService orderService;
 
     @Autowired
-    public OrderController(KafkaProducerService kafkaProducer) {
-        this.kafkaProducer = kafkaProducer;
+    public OrderController(OrderService orderService) {
+        this.orderService = orderService;
     }
 
-    @PostMapping
-    @Operation(summary = "Send order to Kafka")
-    public ResponseEntity<String> createOrder(@Valid @RequestBody OrderDTO orderDTO) {
-        kafkaProducer.sendMessage(orderDTO);
-        return new ResponseEntity<>("Order sent to Kafka", HttpStatus.CREATED);
+    // Синхронный эндпоинт
+    @PostMapping("/sync")
+    @Operation(summary = "Create order synchronously")
+    public ResponseEntity<String> createOrderSync(@Valid @RequestBody OrderDTO orderDTO) {
+        OrderDTO createdOrder = orderService.createOrderSync(orderDTO);
+
+        return new ResponseEntity<>("Order created successfully: " + createdOrder, HttpStatus.OK);
+    }
+
+    // Асинхронный эндпоинт
+    @PostMapping("/async")
+    @Operation(summary = "Create order asynchronously")
+    public ResponseEntity<String> createOrderAsync(@Valid @RequestBody OrderDTO orderDTO) {
+        orderService.createOrderAsync(orderDTO);
+
+        return new ResponseEntity<>("Order is being processed asynchronously", HttpStatus.OK);
     }
 }
