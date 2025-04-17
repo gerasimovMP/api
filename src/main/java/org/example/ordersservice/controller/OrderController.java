@@ -4,6 +4,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.example.notificationservice.CreateOrderRequest;
+import org.example.notificationservice.CreateOrderResponse;
+import org.example.ordersservice.client.NotificationSoapClient;
 import org.example.ordersservice.model.OrderDTO;
 import org.example.ordersservice.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +21,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Slf4j
@@ -27,10 +34,12 @@ import java.util.List;
 public class OrderController {
 
     private final OrderService orderService;
+    private final NotificationSoapClient soapClient;
 
     @Autowired
-    public OrderController(OrderService orderService) {
+    public OrderController(OrderService orderService, NotificationSoapClient soapClient) {
         this.orderService = orderService;
+        this.soapClient = soapClient;
     }
 
     @PostMapping
@@ -80,5 +89,25 @@ public class OrderController {
         log.info("Received DELETE request to remove order with ID: {}", id);
         orderService.deleteOrder(id);
         return new ResponseEntity<>("Order deleted successfully", HttpStatus.OK);
+    }
+
+    @PostMapping("/soap")
+    public ResponseEntity<String> createOrder(@RequestBody OrderDTO orderDTO) throws DatatypeConfigurationException {
+        CreateOrderRequest request = new CreateOrderRequest();
+        if (orderDTO.getId() != null) {
+            request.setId(orderDTO.getId());
+        }
+        request.setItemId(orderDTO.getItemId());
+        request.setQuantity(orderDTO.getQuantity());
+        if (orderDTO.getOrderDate() != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+            String formattedDate = orderDTO.getOrderDate().format(formatter);
+            XMLGregorianCalendar xmlGregorianCalendar = DatatypeFactory.newInstance()
+                    .newXMLGregorianCalendar(formattedDate);
+            request.setOrderDate(xmlGregorianCalendar);
+        }
+        request.setStatus(orderDTO.getStatus());
+        CreateOrderResponse response = soapClient.sendOrder(request);
+        return ResponseEntity.ok("Order sent via SOAP. Status: " + response.getStatus());
     }
 }

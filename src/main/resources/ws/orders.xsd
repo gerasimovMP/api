@@ -1,0 +1,28 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://notificationservice.example.org"
+           xmlns:tns="http://notificationservice.example.org"
+           elementFormDefault="qualified">
+
+    <!-- Создание заказа - запрос -->
+    <xs:element name="createOrderRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="id" type="xs:long"/>
+                <xs:element name="itemId" type="xs:string"/>
+                <xs:element name="quantity" type="xs:int"/>
+                <xs:element name="orderDate" type="xs:dateTime"/>
+                <xs:element name="status" type="xs:string"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- Создание заказа - ответ -->
+    <xs:element name="createOrderResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="status" type="xs:string"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+</xs:schema>
