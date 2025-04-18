@@ -28,7 +28,7 @@ public class OrderService {
     }
 
     public void createOrderAsync(OrderDTO orderDTO) {
-        kafkaProducerService.sendMessage(orderDTO); // Отправляем в Kafka
+        kafkaProducerService.sendMessage(orderDTO);
         log.info("Order creation request sent to Kafka topic for asynchronous processing.");
     }
 
